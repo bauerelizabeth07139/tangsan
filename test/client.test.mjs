@@ -69,6 +69,9 @@ function makeEl(tag) {
     getAttribute(name) {
       return this.attrs[name] ?? null
     },
+    hasAttribute(name) {
+      return name in this.attrs
+    },
     appendChild(child) {
       child.parentNode = this
       this.children.push(child)
@@ -179,7 +182,12 @@ const React = {
 }
 
 const puts = []
+const diagPosts = []
 const fetchStub = (url, options) => {
+  if (options !== undefined && options.method === 'POST' && typeof url === 'string' && url.endsWith('/diag')) {
+    diagPosts.push(JSON.parse(options.body))
+    return Promise.resolve({ json: () => Promise.resolve({ ok: true }) })
+  }
   if (options !== undefined && options.method === 'PUT') {
     puts.push(JSON.parse(options.body))
     return Promise.resolve({ json: () => Promise.resolve(JSON.parse(options.body)) })
@@ -239,7 +247,11 @@ assert.equal(layer.children.length, 2)
 const [image, scrim] = layer.children
 assert.match(image.styleProps['background-image'], /\/api\/tangsan\/wallpaper/)
 assert.equal(image.styleProps['background-size'], undefined, 'sizing comes from the stylesheet, not an inline override')
-assert.match(scrim.styleProps.background, /^rgba\(0,0,0,0\.350\)$/)
+assert.match(scrim.styleProps.background, /^rgba\(255,255,255,0\.350\)$/, 'light theme gets a white wash')
+assert.ok(diagPosts.length >= 1, 'the client reported a diagnostic');
+assert.equal(diagPosts[0].mounted, true, 'layer reported as mounted');
+assert.equal(diagPosts[0].client, 'v2');
+assert.ok(Array.isArray(diagPosts[0].tokens) && diagPosts[0].tokens.length >= 1, 'token overrides reported');
 
 // --- surface fade ------------------------------------------------------------
 assert.equal(

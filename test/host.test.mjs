@@ -81,11 +81,12 @@ host.apply(ctx)
 
 assert.deepEqual([...routes.keys()].sort(), [
   '/api/tangsan/config',
+  '/api/tangsan/diag',
   '/api/tangsan/mark',
   '/api/tangsan/wallpaper',
 ])
 assert.equal(taps.length, 1)
-assert.equal(effects.length, 4)
+assert.equal(effects.length, 5)
 
 // --- GET config: defaults before anything is written -------------------------
 {
@@ -95,7 +96,7 @@ assert.equal(effects.length, 4)
   assert.deepEqual(JSON.parse(res.text()), {
     wallpaper: 'true',
     brand: 'true',
-    surfaceOpacity: '88',
+    surfaceOpacity: '60',
     blur: '0',
     scrim: '35',
     position: 'center',
@@ -171,6 +172,37 @@ for (const path of ['/api/tangsan/wallpaper', '/api/tangsan/mark']) {
   assert.equal(res.bytes().length, 0)
 }
 
+// --- the browser diagnostic round-trips and is sanitized ---------------------
+{
+  const post = fakeRes()
+  const body = JSON.stringify({
+    at: 123,
+    client: 'v2',
+    mounted: true,
+    layerCount: 1,
+    darkTheme: false,
+    surface: 'true/60/35',
+    tokenCount: 1,
+    tokens: [{ n: '--dsw-alias-bg-base', v: 'color-mix(in srgb,#fff 60%,transparent)' }],
+    error: '',
+    injected: 'x'.repeat(4000),
+    deep: { nope: true },
+  })
+  await routes.get('/api/tangsan/diag')(fakeReq('POST', body), post)
+  assert.equal(post.statusCode, 200)
+
+  const get = fakeRes()
+  await routes.get('/api/tangsan/diag')(fakeReq('GET'), get)
+  const report = JSON.parse(get.text()).report
+  assert.equal(report.mounted, true)
+  assert.equal(report.client, 'v2')
+  assert.equal(report.tokenCount, 1)
+  assert.equal(report.tokens.length, 1)
+  assert.ok(report.tokens[0].v.startsWith('color-mix'))
+  assert.equal('injected' in report, false, 'unknown fields are dropped')
+  assert.equal('deep' in report, false, 'unknown objects are dropped')
+}
+
 // --- the boot stamp carries config and artwork URLs --------------------------
 {
   const html = taps[0]('<html><head><title>x</title></head><body></body></html>')
@@ -193,7 +225,7 @@ for (const path of ['/api/tangsan/wallpaper', '/api/tangsan/mark']) {
   assert.deepEqual(JSON.parse(res.text()), {
     wallpaper: 'true',
     brand: 'true',
-    surfaceOpacity: '88',
+    surfaceOpacity: '60',
     blur: '0',
     scrim: '35',
     position: 'center',
