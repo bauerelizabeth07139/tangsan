@@ -6,7 +6,7 @@
  * Run with: npm test  (node test/host.test.mjs)
  */
 import assert from 'node:assert/strict'
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -132,6 +132,15 @@ assert.equal(effects.length, 5)
   const saved = JSON.parse(readFileSync(join(home, 'tangsan.json'), 'utf8'))
   assert.equal(saved.surfaceOpacity, '100')
   assert.equal('exfiltrate' in saved, false)
+}
+
+// --- the config write is atomic: no temporary sibling survives ----------------
+{
+  assert.deepEqual(
+    readdirSync(home).filter((name) => name.endsWith('.tmp')),
+    [],
+    'the config write leaves no temporary file behind',
+  )
 }
 
 // --- cross-site writes are refused ------------------------------------------

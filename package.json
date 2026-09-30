@@ -1,6 +1,6 @@
 {
   "name": "tangsan",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TangSan mascot appearance layer for the DeepSeek Harness web GUI: wears a generated TangSan portrait as the chat background (surface fade, opacity, blur and scrim controls) and injects it as the sidebar and conversation brand mark, with a Settings section driving it all.",
   "type": "module",
   "license": "MIT",

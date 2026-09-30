@@ -164,12 +164,18 @@ class MutationObserverStub {
 // --- module loader / React / fetch stubs ------------------------------------
 
 let loaded = null
+const timers = []
 const window = {
   __ModuleLoader__: {
     load(spec) {
       loaded = spec
     },
   },
+  setInterval(fn) {
+    timers.push(fn)
+    return timers.length
+  },
+  clearInterval() {},
   __TANGSAN__: {
     config: { wallpaper: 'true', brand: 'true', surfaceOpacity: '88', blur: '0', scrim: '35', position: 'center' },
     wallpaper: '/api/tangsan/wallpaper',
@@ -209,15 +215,38 @@ assert.ok(loaded, 'client registers itself with __ModuleLoader__')
 assert.equal(loaded.id, 'tangsan')
 
 const seats = new Map()
+/** Single-occupant slots, exactly as the shell declares them. */
+const SINGLE_SLOTS = new Set(['sidebar.brand.mark', 'conversation.hero.brand.mark'])
+const entries = []
 const slots = {
   inject(slotName, factory) {
+    const mark = entries.length
     seats.set(slotName, factory())
-    return () => seats.delete(slotName)
+    return () => {
+      seats.delete(slotName)
+      for (const entry of entries.splice(mark)) entry.disposed = true
+    }
   },
   register(meta, component) {
-    return { meta, component }
+    const priority = meta.priority ?? 0
+    if (
+      SINGLE_SLOTS.has(meta.name) &&
+      entries.some((entry) => !entry.disposed && entry.meta.name === meta.name && entry.priority === priority)
+    ) {
+      throw new Error(
+        `single slot "${meta.name}" already has a registration at priority ${priority}` +
+          ' — register at a different priority to shadow it (lowest renders)',
+      )
+    }
+    const entry = { meta, component, priority, disposed: false }
+    entries.push(entry)
+    return entry
   },
 }
+
+// The shipped @deepseek-ai/dsh-client-ui-brand-official claims the single
+// sidebar slot at the default priority before any third-party mark does.
+slots.register({ name: 'sidebar.brand.mark' }, () => null)
 
 const plugin = loaded.factory((name) => {
   assert.equal(name, 'react')
@@ -234,6 +263,15 @@ assert.ok(seats.has('conversation.hero.brand.mark'), 'hero mark seated')
 assert.ok(seats.has('settings.section'), 'settings section seated')
 assert.equal(seats.get('settings.section').meta.id, 'tangsan')
 assert.equal(seats.get('settings.section').meta.label, '唐三美化 TangSan')
+
+assert.ok(
+  entries.some((entry) => entry.meta.name === 'sidebar.brand.mark' && entry.priority < 0),
+  'the sidebar mark shadows the official occupant instead of colliding with it',
+)
+assert.ok(
+  entries.some((entry) => entry.meta.name === 'conversation.hero.brand.mark' && entry.priority < 0),
+  'the hero mark registers at the shadowing priority too',
+)
 
 const markEl = seats.get('sidebar.brand.mark').component({ size: 28 })
 assert.equal(markEl.type, 'img')
@@ -264,6 +302,16 @@ assert.ok(Array.isArray(document.head.children), 'head exists');
   assert.equal(icons.length, 1, 'exactly one favicon link');
   assert.equal(icons[0].getAttribute('href'), '/api/tangsan/mark', 'favicon points at the plugin artwork');
   assert.equal(icons[0].getAttribute('type'), 'image/jpeg');
+
+  const tick = timers[timers.length - 1];
+  assert.equal(typeof tick, 'function', 'the worn mark arms a favicon watch');
+  icons[0].setAttribute('data-dsh-mascot-icon', 'another-mascot');
+  icons[0].setAttribute('href', '/api/another-mascot/mark');
+  tick();
+  assert.equal(icons[0].getAttribute('href'), '/api/another-mascot/mark', 'another appearance plugin keeps the icon');
+  icons[0].removeAttribute('data-dsh-mascot-icon');
+  tick();
+  assert.equal(icons[0].getAttribute('href'), '/api/tangsan/mark', 'the icon comes back once the other plugin lets go');
 }
 
 

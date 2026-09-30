@@ -16,6 +16,16 @@
 
 ## Install
 
+**DeepSeek Harness Desktop** — install it from the application, not from a shell: open **Plugins** in the sidebar, choose **Add plugin**, enter
+
+```
+https://github.com/bauerelizabeth07139/tangsan
+```
+
+and switch the new **tangsan** bundle on. The Desktop application boots the reserved `desktop` profile, so the command below installs into a different profile that the Desktop app never reads.
+
+**dsh CLI (`web` profile)** — install it into the profile you boot:
+
 ```sh
 dsh plugin --profile web add bauerelizabeth07139/tangsan
 ```
@@ -69,6 +79,31 @@ npm test   # node >= 22: host routes/config/stamp tests + client DOM-stub tests
 
 ---
 
+## Troubleshooting
+
+### The application does not start: `... is not valid JSON`
+
+The Harness Host reads each profile manifest as JSON before it loads any
+plugin, so one stray `,` before the opening `{` of a manifest makes the read
+throw and the application stop. The Desktop recovery action "Disable
+third-party plugins" cannot repair it: it re-reads the same broken manifest.
+
+Find the damaged file — the Desktop application boots `$DSH_HOME/profiles/desktop`
+(`$DSH_HOME` defaults to `~/.dsh`):
+
+```powershell
+$home = if ($env:DSH_HOME) { $env:DSH_HOME } else { Join-Path $env:USERPROFILE '.dsh' }
+Get-ChildItem (Join-Path $home 'profiles\*\package.json'), (Join-Path $home 'profiles\*\node_modules\*\package.json') -ErrorAction SilentlyContinue |
+  ForEach-Object { try { $null = Get-Content $_ -Raw | ConvertFrom-Json; "OK   $_" } catch { "BAD  $_" } }
+```
+
+A `BAD` file whose first non-space character is a comma is otherwise intact:
+delete that one character. Deleting the whole file also works when it is the
+profile manifest — the next start re-creates it from the shipped template and
+only the bundle selection is lost, because installed packages stay in the
+profile's `node_modules`; switch `tangsan` back on from **Plugins**. While the
+manifest is broken, neither `dsh plugin` nor the Plugins page can run.
+
 ## 中文
 
 **DeepSeek Harness 网页端的唐三美化形象插件** —— 一张生成的唐三插画随插件一起分发，由 Harness 当作背景、品牌标识与设置项穿在身上。
@@ -83,6 +118,16 @@ npm test   # node >= 22: host routes/config/stamp tests + client DOM-stub tests
 - **宿主半**：由本地 DSH Web 服务直接提供 artwork 与配置接口（`/api/tangsan/...`），浏览器无需访问外部网络；配置同时被盖进 HTML，页面一打开就是美化后的样子。
 
 ### 安装
+
+**桌面版 DeepSeek Harness**:请在应用内安装——侧栏 **Plugins → Add plugin**,填入
+
+```
+https://github.com/bauerelizabeth07139/tangsan
+```
+
+然后打开 **tangsan** 这个 bundle。桌面版启动的是保留 profile `desktop`,而下面的命令行会把插件装进另一个 profile,桌面版不会读取它。
+
+**dsh 命令行(`web` profile)**:装进你实际启动的 profile。
 
 ```sh
 dsh plugin --profile web add bauerelizabeth07139/tangsan
@@ -103,6 +148,29 @@ dsh plugin --profile web add bauerelizabeth07139/tangsan
 ```sh
 npm test   # 需要 node >= 22，无任何运行时依赖
 ```
+
+### 疑难解答
+
+#### 应用无法启动,报 `... is not valid JSON`
+
+Host 在加载任何插件之前会把每个 profile manifest 当作 JSON 读取;只要某个
+manifest 开头的 `{` 之前多出一个 `,`,这次读取就会抛错,应用随之停止。桌面版
+的「禁用第三方插件」恢复按钮修不好它,因为它会重新读取同一个坏文件。
+
+定位损坏的文件(桌面版启动的是 `$DSH_HOME/profiles/desktop`,`$DSH_HOME` 默认
+为 `~/.dsh`):
+
+```powershell
+$home = if ($env:DSH_HOME) { $env:DSH_HOME } else { Join-Path $env:USERPROFILE '.dsh' }
+Get-ChildItem (Join-Path $home 'profiles\*\package.json'), (Join-Path $home 'profiles\*\node_modules\*\package.json') -ErrorAction SilentlyContinue |
+  ForEach-Object { try { $null = Get-Content $_ -Raw | ConvertFrom-Json; "OK   $_" } catch { "BAD  $_" } }
+```
+
+报告为 `BAD` 且第一个非空白字符是逗号的文件,其余内容是完好的:删掉那一个逗号
+即可。如果坏的是 profile manifest 本身,直接删除整个文件也可以——下次启动会按
+内置模板重建,只会丢失 bundle 的勾选记录,已安装的包仍留在 profile 的
+`node_modules` 里,在 **Plugins** 页面重新打开 `tangsan` 即可。manifest 损坏期间,
+`dsh plugin` 与 Plugins 页面同样无法工作。
 
 ## License
 
