@@ -11,6 +11,7 @@
 - **Controls** — opacity of the shell surfaces, wallpaper blur, a dark scrim for readability, and `background-position`, all applied live.
 - **Brand mark** — the square TangSan avatar replaces the logo in the sidebar and the conversation hero through the stock `sidebar.brand.mark` and `conversation.hero.brand.mark` slots.
 - **Settings section** — a 「唐三美化 TangSan」 page in Settings edits everything, with previews of both artworks, and applies on save.
+- **Tab icon** — the browser tab favicon follows the same TangSan avatar while the brand mark is on, and the stock icons come back when it is switched off.
 - **Host half** — serves the artwork and the config from the local DSH web server (`/api/tangsan/...`), so the browser never reaches outside, and stamps the config into the HTML so the GUI comes up already dressed.
 
 ## Install
@@ -78,6 +79,7 @@ npm test   # node >= 22: host routes/config/stamp tests + client DOM-stub tests
 - **可调参数**：界面不透明度、背景模糊、暗色遮罩、壁纸位置，改动即时生效。
 - **品牌标识**：通过官方的 `sidebar.brand.mark` 与 `conversation.hero.brand.mark` 插槽，把侧栏与会话标题处的 logo 换成唐三方形头像。
 - **设置页**：Settings 里的「唐三美化 TangSan」页面提供两 artwork 预览与全部开关，保存即生效。
+- **标签页图标**：品牌标识开启时，浏览器标签页小图标也换成同一张唐三头像；关闭后恢复官方图标。
 - **宿主半**：由本地 DSH Web 服务直接提供 artwork 与配置接口（`/api/tangsan/...`），浏览器无需访问外部网络；配置同时被盖进 HTML，页面一打开就是美化后的样子。
 
 ### 安装

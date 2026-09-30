@@ -72,6 +72,9 @@ function makeEl(tag) {
     hasAttribute(name) {
       return name in this.attrs
     },
+    removeAttribute(name) {
+      delete this.attrs[name]
+    },
     appendChild(child) {
       child.parentNode = this
       this.children.push(child)
@@ -252,6 +255,17 @@ assert.ok(diagPosts.length >= 1, 'the client reported a diagnostic');
 assert.equal(diagPosts[0].mounted, true, 'layer reported as mounted');
 assert.equal(diagPosts[0].client, 'v2');
 assert.ok(Array.isArray(diagPosts[0].tokens) && diagPosts[0].tokens.length >= 1, 'token overrides reported');
+
+assert.ok(Array.isArray(document.head.children), 'head exists');
+{
+  const icons = document.head.children.filter(
+    (el) => String(el.tagName).toUpperCase() === 'LINK' && /\bicon\b/i.test(String(el.getAttribute('rel') || '')),
+  );
+  assert.equal(icons.length, 1, 'exactly one favicon link');
+  assert.equal(icons[0].getAttribute('href'), '/api/tangsan/mark', 'favicon points at the plugin artwork');
+  assert.equal(icons[0].getAttribute('type'), 'image/jpeg');
+}
+
 
 // --- surface fade ------------------------------------------------------------
 assert.equal(
