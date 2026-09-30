@@ -1,0 +1,14 @@
+# tangsan bundle patch — the loader row that makes both halves load.
+#
+# The loader resolves this package by `name` and imports lib/index.js as the
+# host half; ClientModuleRegistry reads dsh.client + exports["./client"] from
+# the same package to ship lib/client.js to the browser. Without this row the
+# client bundle is never delivered.
+#
+#   id:   loader-row id, used for patch targeting/disable, must be unique
+#   name: the real package name `tangsan` — must match package.json and the
+#         __ModuleLoader__.load({ id: 'tangsan' }) key in lib/client.js
+#         character for character.
+- insert:
+    - id: tangsan
+      name: 'tangsan'

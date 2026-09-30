@@ -1,0 +1,69 @@
+{
+  "name": "tangsan",
+  "version": "0.1.0",
+  "description": "TangSan mascot appearance layer for the DeepSeek Harness web GUI: wears a generated TangSan portrait as the chat background (surface fade, opacity, blur and scrim controls) and injects it as the sidebar and conversation brand mark, with a Settings section driving it all.",
+  "type": "module",
+  "license": "MIT",
+  "author": "bauerelizabeth07139",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bauerelizabeth07139/tangsan.git"
+  },
+  "homepage": "https://github.com/bauerelizabeth07139/tangsan#readme",
+  "bugs": {
+    "url": "https://github.com/bauerelizabeth07139/tangsan/issues"
+  },
+  "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "assets",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22",
+    "dsh": ">=0.1.5-rc.1 <0.2.0-0 || >=0.2.0-rc.0 <0.3.0-0"
+  },
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings"
+      ],
+      "external": []
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.2",
+    "react": ">=18.2.0"
+  },
+  "scripts": {
+    "test": "node test/host.test.mjs && node test/client.test.mjs"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "theme",
+    "wallpaper",
+    "avatar",
+    "mascot",
+    "identity",
+    "主题",
+    "壁纸",
+    "唐三"
+  ]
+}
