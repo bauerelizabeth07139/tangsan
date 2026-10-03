@@ -79,6 +79,23 @@ npm test   # node >= 22: host routes/config/stamp tests + client DOM-stub tests
 
 ---
 
+## Plugin metadata
+
+The manifest declares what the Harness and the plugin catalogs read without
+activating the plugin:
+
+| Field | Value |
+|---|---|
+| `dsh.bundle.patch` | `./cordis.patch.yml` — what makes this package an installable profile bundle |
+| `dsh.client` | `platform: web`, so the browser half ships with the bundle |
+| `locale/en.json`, `locale/zh.json` | card title and description (`meta.title`, `meta.description`) |
+| `icon` | `./assets/tangsan-mark.jpg` — the card artwork (SVG/PNG/JPEG/WebP, at most 256 KiB) |
+| `exports` | `./package.json` and `./locale/*.json`, the two subpaths the readers resolve |
+
+Both locale files and the icon are resolved through the package specifier, so a
+package that keeps `exports` sealed without these subpaths shows up under its
+bare package name instead of its title.
+
 ## Troubleshooting
 
 ### The application does not start: `... is not valid JSON`
@@ -148,6 +165,21 @@ dsh plugin --profile web add bauerelizabeth07139/tangsan
 ```sh
 npm test   # 需要 node >= 22，无任何运行时依赖
 ```
+
+### 插件元数据
+
+manifest 里声明了 Harness 与插件目录在不激活插件的情况下会读取的字段:
+
+| 字段 | 值 |
+|---|---|
+| `dsh.bundle.patch` | `./cordis.patch.yml` —— 让这个包成为可安装 profile bundle 的关键 |
+| `dsh.client` | `platform: web`,浏览器半随 bundle 一起分发 |
+| `locale/en.json`、`locale/zh.json` | 卡片标题与描述(`meta.title`、`meta.description`) |
+| `icon` | `./assets/tangsan-mark.jpg` —— 卡片配图(SVG/PNG/JPEG/WebP,上限 256 KiB) |
+| `exports` | `./package.json` 与 `./locale/*.json`,读取方解析的这两个子路径 |
+
+两个语言文件与图标都是通过包名解析的:若 `exports` 没有开放这两个子路径,插件在列表里
+只会显示裸包名,而不是这里的标题。
 
 ### 疑难解答
 

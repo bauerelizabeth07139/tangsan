@@ -1,6 +1,6 @@
 {
   "name": "tangsan",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "TangSan mascot appearance layer for the DeepSeek Harness web GUI: wears a generated TangSan portrait as the chat background (surface fade, opacity, blur and scrim controls) and injects it as the sidebar and conversation brand mark, with a Settings section driving it all.",
   "type": "module",
   "license": "MIT",
@@ -20,6 +20,7 @@
     },
     "./client": "./lib/client.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
     "./package.json": "./package.json"
   },
   "files": [
@@ -27,7 +28,8 @@
     "assets",
     "cordis.patch.yml",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "locale"
   ],
   "engines": {
     "node": ">=22",
@@ -65,6 +67,9 @@
     "identity",
     "主题",
     "壁纸",
-    "唐三"
-  ]
+    "唐三",
+    "appearance",
+    "美化"
+  ],
+  "icon": "./assets/tangsan-mark.jpg"
 }
