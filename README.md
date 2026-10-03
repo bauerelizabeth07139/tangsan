@@ -30,6 +30,14 @@ and switch the new **tangsan** bundle on. The Desktop application boots the rese
 dsh plugin --profile web add bauerelizabeth07139/tangsan
 ```
 
+**No git on the machine?** pnpm resolves a git shorthand with `git ls-remote`, so an `owner/repo` or `github:` spec fails with `'git' is not recognized` when git is missing from PATH. Install the published tarball over plain HTTPS instead — that path never calls git:
+
+```sh
+dsh plugin --profile web add https://codeload.github.com/bauerelizabeth07139/tangsan/tar.gz/main
+```
+
+The same address works in the Desktop application's **Plugins → Add plugin** dialog. Pin the revision by replacing `main` with a commit SHA (`/tar.gz/<sha>`) when you want a fixed build.
+
 Any spec the plugin manager accepts works — a GitHub shorthand, a full git URL, or a local checkout:
 
 ```sh
@@ -149,6 +157,17 @@ https://github.com/bauerelizabeth07139/tangsan
 ```sh
 dsh plugin --profile web add bauerelizabeth07139/tangsan
 ```
+
+**机器上没有 git?** pnpm 解析 git 形式的依赖时会调用 `git ls-remote`,`owner/repo`、`github:`
+这类写法在 PATH 里找不到 git 时会直接报 `'git' 不是内部或外部命令`。改成用 HTTPS 直接下载 tarball
+即可,这条路径完全不需要 git:
+
+```sh
+dsh plugin --profile web add https://codeload.github.com/bauerelizabeth07139/tangsan/tar.gz/main
+```
+
+同样的地址也能填进桌面版的 **Plugins → Add plugin**。想要固定版本,把 `main` 换成提交 SHA
+(`/tar.gz/<sha>`) 即可。
 
 随后打开 **Settings → 唐三美化 TangSan**。卸载：`dsh plugin --profile web remove tangsan`。
 
